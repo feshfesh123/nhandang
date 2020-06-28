@@ -37,7 +37,7 @@ class DataLoader:
 		self.samples = []
 
 		chars = set()
-		data_dir = '../data/'
+		data_dir = filePath
 		self.root = data_dir
 		file_list = os.listdir(data_dir)
 		for file_name in file_list:
