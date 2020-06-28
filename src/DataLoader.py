@@ -25,7 +25,7 @@ class Batch:
 class DataLoader:
 	"loads data which corresponds to IAM format, see: http://www.fki.inf.unibe.ch/databases/iam-handwriting-database" 
 
-	def __init__(self, filePath, batchSize, imgSize, maxTextLen):
+	def __init__(self, filePath, batchSize, imgSize, maxTextLen, numTrainSamplesPerEpoch = 5):
 		"loader for dataset at given location, preprocess images and text according to parameters"
 
 		assert filePath[-1]=='/'
@@ -65,7 +65,7 @@ class DataLoader:
 		self.validationWords = [x.gtText for x in self.validationSamples]
 
 		# number of randomly chosen samples per epoch for training 
-		self.numTrainSamplesPerEpoch = 5
+		self.numTrainSamplesPerEpoch = numTrainSamplesPerEpoch
 		
 		# start with train set
 		self.trainSet()
