@@ -25,7 +25,7 @@ class Batch:
 class DataLoader:
 	"loads data which corresponds to IAM format, see: http://www.fki.inf.unibe.ch/databases/iam-handwriting-database" 
 
-	def __init__(self, filePath, batchSize, imgSize, maxTextLen, numTrainSamplesPerEpoch):
+	def __init__(self, filePath, batchSize, imgSize, maxTextLen, numTrainSamplesPerEpoch, numDatasPerEpoch):
 		"loader for dataset at given location, preprocess images and text according to parameters"
 
 		assert filePath[-1]=='/'
@@ -40,6 +40,8 @@ class DataLoader:
 		data_dir = filePath
 		self.root = data_dir
 		file_list = os.listdir(data_dir)
+
+		n = 0
 		for file_name in file_list:
 			if file_name.endswith(".png") or file_name.endswith(".jpg"):
 				label_path = file_name.replace(".jpg", ".txt")
@@ -54,7 +56,9 @@ class DataLoader:
 
 				# put sample into list
 				self.samples.append(Sample(word, image_path))
-
+				n+=1
+				if n > numDatasPerEpoch:
+					break
 		# split into training and validation set: 95% - 5%
 		splitIdx = int(0.95 * len(self.samples))
 		self.trainSamples = self.samples[:splitIdx]
