@@ -25,7 +25,7 @@ class Batch:
 class DataLoader:
 	"loads data which corresponds to IAM format, see: http://www.fki.inf.unibe.ch/databases/iam-handwriting-database" 
 
-	def __init__(self, filePath, batchSize, imgSize, maxTextLen, numTrainSamplesPerEpoch = 5):
+	def __init__(self, filePath, batchSize, imgSize, maxTextLen, numTrainSamplesPerEpoch):
 		"loader for dataset at given location, preprocess images and text according to parameters"
 
 		assert filePath[-1]=='/'
@@ -95,7 +95,6 @@ class DataLoader:
 		random.shuffle(self.trainSamples)
 		self.samples = self.trainSamples[:self.numTrainSamplesPerEpoch]
 
-	
 	def validationSet(self):
 		"switch to validation set"
 		self.dataAugmentation = False

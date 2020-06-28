@@ -74,7 +74,7 @@ def validate(model, loader):
 		batch = loader.getNext()
 		print(len(batch.gtTexts))
 		(recognized, _) = model.inferBatch(batch)
-		
+
 		print('Ground truth -> Recognized')	
 		for i in range(len(recognized)):
 			numWordOK += 1 if batch.gtTexts[i] == recognized[i] else 0
