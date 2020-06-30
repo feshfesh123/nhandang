@@ -18,8 +18,8 @@ class Model:
 
 	# model constants
 	batchSize = 1
-	imgSize = (128, 32)
-	maxTextLen = 32
+	imgSize = (800, 64)
+	maxTextLen = 100
 
 	def __init__(self, charList, decoderType=DecoderType.BestPath, mustRestore=False, dump=False):
 		"init model: add CNN, RNN and CTC and initialize TF"
@@ -52,25 +52,25 @@ class Model:
 
 			
 	def setupCNN(self):
-		"create CNN layers and return output of these layers"
-		cnnIn4d = tf.expand_dims(input=self.inputImgs, axis=3)
+			"create CNN layers and return output of these layers"
+			cnnIn4d = tf.expand_dims(input=self.inputImgs, axis=3)
 
-		# list of parameters for the layers
-		kernelVals = [5, 5, 3, 3, 3]
-		featureVals = [1, 32, 64, 128, 128, 256]
-		strideVals = poolVals = [(2,2), (2,2), (1,2), (1,2), (1,2)]
-		numLayers = len(strideVals)
+			# list of parameters for the layers
+			kernelVals = [5, 5, 3, 3, 3, 3, 3]
+			featureVals = [1, 64, 128, 128, 256, 256, 512, 512]
+			strideVals = poolVals = [(2,2), (1,2), (2,2), (1,1), (2,2), (1,2), (1,2)]
+			numLayers = len(strideVals)
 
-		# create layers
-		pool = cnnIn4d # input to first CNN layer
-		for i in range(numLayers):
-			kernel = tf.Variable(tf.truncated_normal([kernelVals[i], kernelVals[i], featureVals[i], featureVals[i + 1]], stddev=0.1))
-			conv = tf.nn.conv2d(pool, kernel, padding='SAME',  strides=(1,1,1,1))
-			conv_norm = tf.layers.batch_normalization(conv, training=self.is_train)
-			relu = tf.nn.relu(conv_norm)
-			pool = tf.nn.max_pool(relu, (1, poolVals[i][0], poolVals[i][1], 1), (1, strideVals[i][0], strideVals[i][1], 1), 'VALID')
+			# create layers
+			pool = cnnIn4d # input to first CNN layer
+			for i in range(numLayers):
+				kernel = tf.Variable(tf.truncated_normal([kernelVals[i], kernelVals[i], featureVals[i], featureVals[i + 1]], stddev=0.1))
+				conv = tf.nn.conv2d(pool, kernel, padding='SAME',  strides=(1,1,1,1))
+				conv_norm = tf.layers.batch_normalization(conv, training=self.is_train)
+				relu = tf.nn.relu(conv_norm)
+				pool = tf.nn.max_pool(relu, (1, poolVals[i][0], poolVals[i][1], 1), (1, strideVals[i][0], strideVals[i][1], 1), 'VALID')
 
-		self.cnnOut4d = pool
+			self.cnnOut4d = pool
 
 
 	def setupRNN(self):
@@ -78,7 +78,7 @@ class Model:
 		rnnIn3d = tf.squeeze(self.cnnOut4d, axis=[2])
 
 		# basic cells which is used to build RNN
-		numHidden = 256
+		numHidden = 512
 		cells = [tf.contrib.rnn.LSTMCell(num_units=numHidden, state_is_tuple=True) for _ in range(2)] # 2 layers
 
 		# stack basic cells
@@ -87,15 +87,14 @@ class Model:
 		# bidirectional RNN
 		# BxTxF -> BxTx2H
 		((fw, bw), _) = tf.nn.bidirectional_dynamic_rnn(cell_fw=stacked, cell_bw=stacked, inputs=rnnIn3d, dtype=rnnIn3d.dtype)
-									
+
 		# BxTxH + BxTxH -> BxTx2H -> BxTx1X2H
 		concat = tf.expand_dims(tf.concat([fw, bw], 2), 2)
-									
+
 		# project output to chars (including blank): BxTx1x2H -> BxTx1xC -> BxTxC
 		kernel = tf.Variable(tf.truncated_normal([1, 1, numHidden * 2, len(self.charList) + 1], stddev=0.1))
-		self.rnnOut3d = tf.squeeze(tf.nn.atrous_conv2d(value=concat, filters=kernel, rate=1, padding='SAME'), axis=[2])
-		
 
+		self.rnnOut3d = tf.squeeze(tf.nn.atrous_conv2d(value=concat, filters=kernel, rate=1, padding='SAME'), axis=[2])
 	def setupCTC(self):
 		"create CTC loss and decoder and return them"
 		# BxTxC -> TxBxC

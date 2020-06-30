@@ -146,7 +146,7 @@ def main():
 
 if __name__ == '__main__':
 	#main()
-	loader = DataLoader(FilePaths.fnTrain, Model.batchSize, Model.imgSize, Model.maxTextLen)
+	loader = DataLoader(FilePaths.fnTrain, Model.batchSize, Model.imgSize, Model.maxTextLen, numTrainSamplesPerEpoch = 5, numDatasPerEpoch = 5)
 
 	# save characters of model for inference mode
 	codecs.open(FilePaths.fnCharList, 'w', 'utf-8').write(str().join(loader.charList))
