@@ -10,12 +10,14 @@ from Model import Model, DecoderType
 from SamplePreprocessor import preprocess
 import codecs
 import os
+import time
+import datetime
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 class FilePaths:
 	"filenames and paths to data"
-	fnCharList = '../model/charList.txt'
-	fnAccuracy = '../model/accuracy.txt'
+	fnCharList = '../../model/charList.txt'
+	fnAccuracy = '../../model/accuracy.txt'
 	fnTrain = '../data/'
 	fnInfer = '../data/test.png'
 	fnCorpus = '../data/corpus.txt'
@@ -33,7 +35,9 @@ def train(model, loader):
 
 		# train
 		print('Train NN')
+		start_time = time.time()
 		loader.trainSet()
+
 		while loader.hasNext():
 			iterInfo = loader.getIteratorInfo()
 			batch = loader.getNext()
@@ -53,6 +57,8 @@ def train(model, loader):
 		else:
 			print('Character error rate not improved')
 			noImprovementSince += 1
+
+		print("Time costs:", str(datetime.timedelta(seconds=(time.time() - start_time))))
 
 		# stop training if no more improvement in the last x epochs
 		if noImprovementSince >= earlyStopping:
