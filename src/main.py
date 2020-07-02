@@ -152,6 +152,9 @@ def main():
 
 if __name__ == '__main__':
 	#main()
+
+	FilePaths.fnTrain = '../../dataset'
+
 	loader = DataLoader(FilePaths.fnTrain, Model.batchSize, Model.imgSize, Model.maxTextLen, numTrainSamplesPerEpoch = 5, numDatasPerEpoch = 5)
 
 	# save characters of model for inference mode
