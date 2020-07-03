@@ -12,7 +12,6 @@ class DecoderType:
 	BeamSearch = 1
 	WordBeamSearch = 2
 
-
 class Model: 
 	"minimalistic TF model for HTR"
 
@@ -66,12 +65,12 @@ class Model:
 			for i in range(numLayers):
 				kernel = tf.Variable(tf.truncated_normal([kernelVals[i], kernelVals[i], featureVals[i], featureVals[i + 1]], stddev=0.1))
 				conv = tf.nn.conv2d(pool, kernel, padding='SAME',  strides=(1,1,1,1))
-				conv_norm = tf.layers.batch_normalization(conv, training=self.is_train)
-				relu = tf.nn.relu(conv_norm)
+				if i == 2 or i == 5:
+					conv = tf.layers.batch_normalization(conv, training=self.is_train)
+				relu = tf.nn.relu(conv)
 				pool = tf.nn.max_pool(relu, (1, poolVals[i][0], poolVals[i][1], 1), (1, strideVals[i][0], strideVals[i][1], 1), 'VALID')
 
 			self.cnnOut4d = pool
-
 
 	def setupRNN(self):
 		"create RNN layers and return output of these layers"
